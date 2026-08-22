@@ -1,1 +1,70 @@
-undefined
+name: Build Mega Drive ROM
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      
+      - name: Setup SGDK
+        run: |
+          cd /opt
+          git clone --depth 1 https://github.com/Stephane-D/SGDK.git
+          echo "GDK=/opt/SGDK" >> $GITHUB_ENV
+      
+      - name: Install Toolchain
+        run: |
+          wget -q https://github.com/Stephane-D/SGDK/releases/download/v2.00/m68k-elf-tools-20240123.tar.gz -P /tmp
+          tar -xzf /tmp/m68k-elf-tools-20240123.tar.gz -C /opt/
+          echo "/opt/m68k-elf/bin" >> $GITHUB_PATH
+      
+      - name: Compile ROM
+        run: make -f $GDK/makefile.gen
+      
+      - name: Prepare output folder
+        run: |
+          mkdir -p output
+          cp out/rom.bin output/rom.bin
+          cp out/rom.bin output/Space_Shooter_MD.bin
+          echo "ROM compilada com sucesso!"
+          ls -lh output/
+      
+      - name: Commit ROM to output folder
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add output/
+          if git diff --staged --quiet; then
+            echo "Nenhuma mudança na ROM"
+          else
+            git commit -m " Atualiza ROM compilada [skip ci]"
+            git push
+            echo "✅ ROM commitada em output/"
+          fi
+      
+      - name: Upload as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: megadrive-rom
+          path: output/rom.bin
+          retention-days: 90
+      
+      - name: Create Release (apenas em tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: output/rom.bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
