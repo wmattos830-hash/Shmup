@@ -42,19 +42,25 @@ jobs:
             echo "Fallback: instalando gcc-m68k via apt..."
             sudo apt-get update
             sudo apt-get install -y gcc-m68k-linux-gnu binutils-m68k-linux-gnu
-            ln -sf /usr/bin/m68k-linux-gnu-gcc /opt/m68k-elf/bin/m68k-elf-gcc 2>/dev/null || true
+            mkdir -p /opt/m68k-elf/bin
+            ln -sf /usr/bin/m68k-linux-gnu-gcc /opt/m68k-elf/bin/m68k-elf-gcc
+            ln -sf /usr/bin/m68k-linux-gnu-as /opt/m68k-elf/bin/m68k-elf-as
+            ln -sf /usr/bin/m68k-linux-gnu-ld /opt/m68k-elf/bin/m68k-elf-ld
           fi
           
+          # GARANTIR QUE O COMPILADOR ESTEJA NO PATH
           echo "/opt/m68k-elf/bin" >> $GITHUB_PATH
+          echo "/usr/bin" >> $GITHUB_PATH
           
-          # Verifica se o compilador funciona
-          if command -v m68k-elf-gcc &> /dev/null; then
-            m68k-elf-gcc --version | head -1
-          else
-            echo "Compilador não encontrado, tentando path alternativo..."
-            export PATH="/usr/bin:$PATH"
-            which m68k-linux-gnu-gcc && echo "gcc-m68k disponível via apt"
-          fi
+          # Debug: Verificar se o compilador existe
+          which m68k-elf-gcc || which m68k-linux-gnu-gcc || echo "COMPILADOR NÃO ENCONTRADO!"
+      
+      - name: Debug Files
+        run: |
+          echo "=== Estrutura de pastas ==="
+          find . -type f -name "*.png" -o -name "*.res"
+          echo "=== Conteúdo de resources.res ==="
+          cat res/resources.res
       
       - name: Compile ROM
         run: |
