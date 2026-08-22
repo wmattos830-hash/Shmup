@@ -26,65 +26,69 @@ jobs:
       
       - name: Install Toolchain and Java
         run: |
-          # Instalar Java (NECESSÁRIO para o rescomp.jar)
           sudo apt-get update
           sudo apt-get install -y default-jre-headless
           
           cd /tmp
           
-          # Opção 1: Release oficial mais recente do SGDK
           if wget -q --spider "https://github.com/Stephane-D/SGDK/releases/latest/download/m68k-elf-tools.tar.gz"; then
             echo "Baixando toolchain oficial do SGDK..."
             wget -q https://github.com/Stephane-D/SGDK/releases/latest/download/m68k-elf-tools.tar.gz
             tar -xzf m68k-elf-tools.tar.gz -C /opt/
-          # Opção 2: Ferramentas do projeto m68k-elf-gcc
           elif wget -q --spider "https://github.com/kubilus1/m68k-elf-gcc/releases/download/v13.2.0/m68k-elf-gcc-13.2.0-linux-x86_64.tar.gz"; then
             echo "Baixando toolchain alternativa..."
             wget -q https://github.com/kubilus1/m68k-elf-gcc/releases/download/v13.2.0/m68k-elf-gcc-13.2.0-linux-x86_64.tar.gz
             tar -xzf m68k-elf-gcc-13.2.0-linux-x86_64.tar.gz -C /opt/
             mv /opt/m68k-elf-gcc-* /opt/m68k-elf 2>/dev/null || true
-          # Opção 3: Instala via apt como último recurso
           else
-            echo "Fallback: instalando gcc-m68k e binutils via apt..."
+            echo "Fallback: instalando gcc-m68k via apt..."
             sudo apt-get install -y gcc-m68k-linux-gnu binutils-m68k-linux-gnu
-            
-            # Criar symlinks para TODAS as ferramentas necessárias pelo SGDK
             mkdir -p /opt/m68k-elf/bin
             for tool in gcc g++ as ld objcopy objdump nm ar ranlib strip; do
               ln -sf /usr/bin/m68k-linux-gnu-$tool /opt/m68k-elf/bin/m68k-elf-$tool
             done
           fi
           
-          # GARANTIR QUE O COMPILADOR ESTEJA NO PATH
           echo "/opt/m68k-elf/bin" >> $GITHUB_PATH
-          
-          # Debug: Verificar se o compilador existe e funciona
-          echo "Verificando compilador:"
           which m68k-elf-gcc && m68k-elf-gcc --version | head -1 || echo "COMPILADOR NÃO ENCONTRADO!"
       
       - name: Verify Resources
         run: |
-          echo "=== Verificando arquivos PNG ==="
+          echo "=== Arquivos PNG ==="
           ls -la res/sprites/
           echo ""
-          echo "=== Conteúdo de resources.res ==="
+          echo "=== resources.res ==="
           cat res/resources.res
           echo ""
-          echo "=== Verificando Java ==="
+          echo "=== Java ==="
           java -version
+      
+      - name: Compile Resources Explicitly
+        run: |
+          echo "Compilando recursos manualmente..."
+          mkdir -p out/release/res
+          java -jar $GDK/bin/rescomp.jar res/resources.res out/release/res/resources.s -dep out/release/res/resources.o
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ FALHA NO RESCOMP! Verifique os caminhos das imagens acima."
+            exit 1
+          fi
+          
+          echo "✅ Recursos compilados com sucesso!"
+          ls -la out/release/res/
       
       - name: Compile ROM
         run: |
-          echo "Iniciando compilação..."
+          echo "Iniciando compilação final..."
           make -f $GDK/makefile.gen
-          echo "Compilação concluída!"
+          echo "✅ Compilação concluída!"
       
       - name: Prepare output folder
         run: |
           mkdir -p output
           cp out/rom.bin output/rom.bin
           cp out/rom.bin output/megadrive-rom.bin
-          echo "ROM compilada com sucesso!"
+          echo "ROM pronta!"
           ls -lh output/
       
       - name: Commit ROM to output folder
