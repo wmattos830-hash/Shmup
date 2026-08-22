@@ -26,18 +26,45 @@ jobs:
       
       - name: Install Toolchain
         run: |
-          wget -q https://github.com/Stephane-D/SGDK/releases/download/v2.00/m68k-elf-tools-20240123.tar.gz -P /tmp
-          tar -xzf /tmp/m68k-elf-tools-20240123.tar.gz -C /opt/
+          cd /tmp
+          
+          # Opção 1: Release oficial mais recente do SGDK
+          if wget -q --spider "https://github.com/Stephane-D/SGDK/releases/latest/download/m68k-elf-tools.tar.gz"; then
+            wget -q https://github.com/Stephane-D/SGDK/releases/latest/download/m68k-elf-tools.tar.gz
+            tar -xzf m68k-elf-tools.tar.gz -C /opt/
+          # Opção 2: Ferramentas do projeto m68k-elf-gcc
+          elif wget -q --spider "https://github.com/kubilus1/m68k-elf-gcc/releases/download/v13.2.0/m68k-elf-gcc-13.2.0-linux-x86_64.tar.gz"; then
+            wget -q https://github.com/kubilus1/m68k-elf-gcc/releases/download/v13.2.0/m68k-elf-gcc-13.2.0-linux-x86_64.tar.gz
+            tar -xzf m68k-elf-gcc-13.2.0-linux-x86_64.tar.gz -C /opt/
+            mv /opt/m68k-elf-gcc-* /opt/m68k-elf 2>/dev/null || true
+          # Opção 3: Instala via apt como último recurso
+          else
+            echo "Fallback: instalando gcc-m68k via apt..."
+            sudo apt-get update
+            sudo apt-get install -y gcc-m68k-linux-gnu binutils-m68k-linux-gnu
+            ln -sf /usr/bin/m68k-linux-gnu-gcc /opt/m68k-elf/bin/m68k-elf-gcc 2>/dev/null || true
+          fi
+          
           echo "/opt/m68k-elf/bin" >> $GITHUB_PATH
+          
+          # Verifica se o compilador funciona
+          if command -v m68k-elf-gcc &> /dev/null; then
+            m68k-elf-gcc --version | head -1
+          else
+            echo "Compilador não encontrado, tentando path alternativo..."
+            export PATH="/usr/bin:$PATH"
+            which m68k-linux-gnu-gcc && echo "gcc-m68k disponível via apt"
+          fi
       
       - name: Compile ROM
-        run: make -f $GDK/makefile.gen
+        run: |
+          make -f $GDK/makefile.gen
       
       - name: Prepare output folder
         run: |
           mkdir -p output
           cp out/rom.bin output/rom.bin
-          cp out/rom.bin output/Space_Shooter_MD.bin
+          cp out/rom.bin output/megadrive-rom.bin
           echo "ROM compilada com sucesso!"
           ls -lh output/
       
@@ -49,7 +76,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "Nenhuma mudança na ROM"
           else
-            git commit -m " Atualiza ROM compilada [skip ci]"
+            git commit -m "🎮 Atualiza ROM compilada [skip ci]"
             git push
             echo "✅ ROM commitada em output/"
           fi
