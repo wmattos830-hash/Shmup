@@ -24,8 +24,12 @@ jobs:
           git clone --depth 1 https://github.com/Stephane-D/SGDK.git
           echo "GDK=/opt/SGDK" >> $GITHUB_ENV
       
-      - name: Install Toolchain
+      - name: Install Toolchain and Java
         run: |
+          # Instalar Java (NECESSÁRIO para o rescomp.jar)
+          sudo apt-get update
+          sudo apt-get install -y default-jre-headless
+          
           cd /tmp
           
           # Opção 1: Release oficial mais recente do SGDK
@@ -42,8 +46,7 @@ jobs:
           # Opção 3: Instala via apt como último recurso
           else
             echo "Fallback: instalando gcc-m68k e binutils via apt..."
-            sudo apt-get update
-            sudo apt-get install -y gcc-m68k-linux-gnu binutils-m68k-linux-gnu default-jre
+            sudo apt-get install -y gcc-m68k-linux-gnu binutils-m68k-linux-gnu
             
             # Criar symlinks para TODAS as ferramentas necessárias pelo SGDK
             mkdir -p /opt/m68k-elf/bin
@@ -59,16 +62,22 @@ jobs:
           echo "Verificando compilador:"
           which m68k-elf-gcc && m68k-elf-gcc --version | head -1 || echo "COMPILADOR NÃO ENCONTRADO!"
       
-      - name: Debug Files
+      - name: Verify Resources
         run: |
-          echo "=== Estrutura de pastas ==="
-          find . -type f -name "*.png" -o -name "*.res"
+          echo "=== Verificando arquivos PNG ==="
+          ls -la res/sprites/
+          echo ""
           echo "=== Conteúdo de resources.res ==="
           cat res/resources.res
+          echo ""
+          echo "=== Verificando Java ==="
+          java -version
       
       - name: Compile ROM
         run: |
+          echo "Iniciando compilação..."
           make -f $GDK/makefile.gen
+          echo "Compilação concluída!"
       
       - name: Prepare output folder
         run: |
