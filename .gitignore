@@ -12,4 +12,4 @@ build/
 .DS_Store
 Thumbs.db
 
-# IMPORTANTE: NÃO ignorar output/ - a ROM compilada fica lá!
+# IMPORTANTE: NÃO ignorar output/
