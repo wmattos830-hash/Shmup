@@ -3,14 +3,13 @@
 Jogo de Mega Drive gerado pelo **MD Shmup Maker 95**.
 
 ## 📥 Baixar a ROM
-A ROM compilada fica disponível em:
 - `output/rom.bin` (Commit automático após cada build)
 - GitHub Actions Artifacts (90 dias)
 - Releases (se usar tags)
 
 👉 [Baixar diretamente](../../raw/main/output/rom.bin)
 
-## ⚙️ Configurações
+## ️ Configurações
 - Velocidade inimigo: 3
 - Frequência de tiros: 30
 - Vidas: 3
