@@ -9,7 +9,7 @@ A ROM compilada fica disponível em **3 lugares**:
 ### 1. 📁 Pasta `output/` (Recomendado)
 A ROM é commitada automaticamente nesta pasta após cada build:
 - `output/rom.bin` - ROM genérica
-- `output/Space_Shooter_MD.bin` - ROM com nome do jogo
+- `output/megadrive-rom.bin` - ROM com nome do repositório
 
 👉 [Clique aqui para baixar diretamente](../../raw/main/output/rom.bin)
 
