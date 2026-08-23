@@ -1,4 +1,4 @@
-#  Space Shooter MD
+# 🎮 Space Shooter MD
 
 Jogo de Mega Drive gerado pelo **MD Shmup Maker 95**.
 
@@ -7,7 +7,7 @@ Jogo de Mega Drive gerado pelo **MD Shmup Maker 95**.
 - GitHub Actions Artifacts (90 dias)
 - Releases (se usar tags)
 
-👉 [Baixar diretamente](../../raw/main/output/rom.bin)
+ [Baixar diretamente](../../raw/main/output/rom.bin)
 
 ## ⚙️ Configurações
 - Velocidade inimigo: 3
