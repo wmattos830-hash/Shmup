@@ -1,4 +1,4 @@
-# 🎮 Space Shooter MD
+#  Space Shooter MD
 
 Jogo de Mega Drive gerado pelo **MD Shmup Maker 95**.
 
@@ -9,7 +9,7 @@ Jogo de Mega Drive gerado pelo **MD Shmup Maker 95**.
 
 👉 [Baixar diretamente](../../raw/main/output/rom.bin)
 
-## ️ Configurações
+## ⚙️ Configurações
 - Velocidade inimigo: 3
 - Frequência de tiros: 30
 - Vidas: 3
