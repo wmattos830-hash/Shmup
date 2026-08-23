@@ -65,10 +65,11 @@ jobs:
       
       - name: Compile Resources
         run: |
-          echo "Compilando recursos a partir do diretório res/..."
-          cd res
-          mkdir -p ../out/release/res
-          java -jar $GDK/bin/rescomp.jar resources.res ../out/release/res/resources.s -dep ../out/release/res/resources.o
+          echo "Compilando recursos da raiz do projeto..."
+          mkdir -p out/release/res
+          
+          # Executar rescomp DA RAIZ DO PROJETO usando caminhos absolutos no .res
+          java -jar $GDK/bin/rescomp.jar res/resources.res out/release/res/resources.s -dep out/release/res/resources.o
           
           if [ $? -ne 0 ]; then
             echo "❌ FALHA NO RESCOMP!"
@@ -76,8 +77,7 @@ jobs:
           fi
           
           echo "✅ Recursos compilados!"
-          ls -la ../out/release/res/
-          cd ..
+          ls -la out/release/res/
       
       - name: Compile ROM
         run: |
