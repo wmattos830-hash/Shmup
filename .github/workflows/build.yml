@@ -63,19 +63,21 @@ jobs:
           echo "=== Java ==="
           java -version
       
-      - name: Compile Resources Explicitly
+      - name: Compile Resources
         run: |
-          echo "Compilando recursos manualmente..."
-          mkdir -p out/release/res
-          java -jar $GDK/bin/rescomp.jar res/resources.res out/release/res/resources.s -dep out/release/res/resources.o
+          echo "Compilando recursos a partir do diretório res/..."
+          cd res
+          mkdir -p ../out/release/res
+          java -jar $GDK/bin/rescomp.jar resources.res ../out/release/res/resources.s -dep ../out/release/res/resources.o
           
           if [ $? -ne 0 ]; then
-            echo "❌ FALHA NO RESCOMP! Verifique os caminhos das imagens acima."
+            echo "❌ FALHA NO RESCOMP!"
             exit 1
           fi
           
-          echo "✅ Recursos compilados com sucesso!"
-          ls -la out/release/res/
+          echo "✅ Recursos compilados!"
+          ls -la ../out/release/res/
+          cd ..
       
       - name: Compile ROM
         run: |
